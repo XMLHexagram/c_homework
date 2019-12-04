@@ -53,3 +53,5 @@ dkms.conf
 /Debug/ProjectS.tlog
 /x64/Debug
 /.vs
+/src/.vs/ProjectS/v16/.suo
+/src/.vs/ProjectS/v16/Browse.VC.db
