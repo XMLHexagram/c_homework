@@ -12,6 +12,11 @@ void DrawGameInfo(int level, int score);
 //设置光标位置
 void goto_xy(int x, int y);
 
+//游戏运行
+void StartGame(int level);
+
+
+
 HANDLE hOut;
 CONSOLE_SCREEN_BUFFER_INFO bInfo;
 CONSOLE_CURSOR_INFO cInfo;
@@ -24,6 +29,11 @@ int CONSOLE_HEIGHT;
 int iRightScore=1000;
 int iErrorScore=500;
 
+
+//时间相关
+time_t curtime;
+clock_t start;
+clock_t now;
 
 int main()
 {
@@ -43,11 +53,8 @@ int main()
 
 
 	//GetCurrentTime
-	time_t curtime;
-	time(&curtime);
-	clock_t start;
-	clock_t now;
 
+	time(&curtime);
 	//Init Rand
 	srand(curtime);
 
@@ -57,6 +64,7 @@ int main()
 
 
 	printf("Type Any Key To Start Game\n\n\n");
+
 
 
 	getchar();
@@ -142,6 +150,9 @@ int main()
 
 
 }
+
+
+
 
 void DrawGameInfo(int level, int score) {
 	//SaveCurrentCursorPos
