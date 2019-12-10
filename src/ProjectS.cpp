@@ -272,7 +272,7 @@ int StartGame(int iLevel)
 				if (cTypedAplha == pFirstWord->cWord || cTypedAplha == pFirstWord->cWord + ('a' - 'A')) {
 					iScore += iRightScore;
 					DeleteWord(pFirstWord);
-					PlaySound(TEXT("Ding.wav"), 0, SND_FILENAME);
+					//PlaySound(TEXT("Ding.wav"), 0, SND_FILENAME);
 					//此处可增加反馈:OnInputCorrectly()
 					//1.正确输入的字母变绿
 					//2.正确输入的音效!
