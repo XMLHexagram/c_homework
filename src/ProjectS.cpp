@@ -107,6 +107,24 @@ int main()
 
 	getchar();
 
+	//锁死控制台边框大小，防止因为拉伸控制台边框大小而导致的错误
+	//（同时此处建议可以扩大控制台的大小
+	HWND hWnd = GetConsoleWindow(); //获得cmd窗口句柄
+	RECT rc;
+	GetWindowRect(hWnd, &rc); //获得cmd窗口对应矩形
+
+	//改变cmd窗口风格
+	SetWindowLongPtr(hWnd,
+		GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) & ~WS_THICKFRAME & ~WS_MAXIMIZEBOX & ~WS_MINIMIZEBOX);
+	SetWindowPos(hWnd,
+		NULL,
+		rc.left,
+		rc.top,
+		rc.right - rc.left, rc.bottom - rc.top,
+		NULL);
+	//）
+
+
 	//游戏开始
 	for (int iLevel = 1, iLastLevelScore = 0; iScore>=0; )
 	{
@@ -176,11 +194,9 @@ int StartGame(int iLevel)
 
 	//绘制游戏界面
 	DrawGameInfo(iLevel);
-
 	//开始生成
 	while (1) {
 		DrawGameInfo(iLevel);
-
 
 		//获取运行时间
 		now = clock();
@@ -283,6 +299,7 @@ int StartGame(int iLevel)
 void DrawGameInfo(int level) {
 
 	//获取当前光标位置(备份)
+	
 	GetConsoleScreenBufferInfo(hOut, &bInfo);
 
 	//光标移动至最上行
@@ -321,7 +338,7 @@ void DrawGameInfo(int level) {
 		printf("═");
 	}
 	printf("╝");
-
+	
 	//恢复光标信息
 	goto_xy(bInfo.dwCursorPosition.X, bInfo.dwCursorPosition.Y);
 
