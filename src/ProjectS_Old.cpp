@@ -6,19 +6,6 @@
 #include<Windows.h>
 
 #define _CRT_SECURE_NO_WARNINGS 1
-
-//字母结构体
-typedef struct Word
-{
-	char iPos;
-	char cWord;
-	char iPosY;
-	Word* pNext;
-}Word;
-Word* pFirstWord; //= (Word*)malloc(sizeof(Word));
-Word* pCurWord = pFirstWord;
-
-
 //绘制游戏信息,卡关(实现),分数(全局);
 void DrawGameInfo(int level);
 
@@ -33,17 +20,6 @@ void DrawWinShell(int iScore, int iNextLevel);
 bool DrawLoseShell(int iScore);
 
 
-void DeleteWord(Word *pTmp)
-{
-	//删去字母
-	goto_xy(pFirstWord->iPos, pFirstWord->iPosY);
-	printf(" ");
-	pFirstWord = pTmp->pNext;
-}
-
-
-
-
 HANDLE hOut;
 CONSOLE_SCREEN_BUFFER_INFO bInfo;
 CONSOLE_CURSOR_INFO cInfo;
@@ -53,8 +29,8 @@ int CONSOLE_WIDTH;
 int CONSOLE_HEIGHT;
 
 //正确,错误的分数
-int iRightScore = 100;
-int iErrorScore = 90;
+int iRightScore=100;
+int iErrorScore=90;
 
 //胜利/失败 次数
 int iWinTimes = 1112;
@@ -63,7 +39,7 @@ int iLoseTimes = 1112;
 //int iSuccessScore = iRightScore* iWinTimes;
 //int iLoseScore = iLoseTime * iErrorScore;
 
-double dNotTypePunishRate = 0.5;
+double dNotTypePunishRate=0.5;
 
 //初始分数
 int iScore = 10000;
@@ -73,7 +49,7 @@ int iScoreOnNewLevel = 0;
 int iMission = 0;
 int iDeadline = 0;
 
-char iWordPos[40];
+
 
 //初始卡关时间(毫秒)
 int iInitialTime = 2000;
@@ -98,15 +74,15 @@ int main()
 	CONSOLE_CURSOR_INFO cInfo;
 	cInfo.bVisible = 0;
 	cInfo.dwSize = 1;
-
+	
 	SetConsoleCursorInfo(hOut, &cInfo);
-
+	
 
 	//获取控制台宽度
 	CONSOLE_WIDTH = bInfo.dwSize.X;
 
 	//控制台高度,暂时无法获取
-	CONSOLE_HEIGHT = 28;
+	CONSOLE_HEIGHT = 30;
 
 
 	//GetCurrentTime
@@ -146,21 +122,21 @@ int main()
 		rc.top,
 		rc.right - rc.left, rc.bottom - rc.top,
 		NULL);
-
+	
 
 
 	//游戏开始
-	for (int iLevel = 1, iLastLevelScore = 0; iScore >= 0; )
+	for (int iLevel = 1, iLastLevelScore = 0; iScore>=0; )
 	{
 		//开始游戏
-		iLastLevelScore = StartGame(iLevel);
-
+		iLastLevelScore= StartGame(iLevel);
+		
 		//胜利
 		if (iLastLevelScore >= iMission)
 		{
 			DrawWinShell(iScore, ++iLevel);
 		}
-		else
+		else 
 		{
 			//分数低于0 或选择放弃游戏
 			if (!DrawLoseShell(iScore))
@@ -193,14 +169,12 @@ int StartGame(int iLevel)
 
 	//开始计时
 	start = clock();
-	int iTimeInDrop = 0;
-	int iTimeInNewWord = 0;
-	
+	int i = 0;
 
-	//初始化字母链表
-	pFirstWord = (Word*)malloc(sizeof(Word));
-	pFirstWord->pNext = 0;
-	pCurWord = pFirstWord;
+	
+	goto_xy(0, 5);
+
+
 	//计算 胜利/失败分数
 	//iScoreOnNewLevel这个变量似乎没用,可用iScore代替?
 	iScoreOnNewLevel = iScore;
@@ -211,20 +185,18 @@ int StartGame(int iLevel)
 	if (iDeadline < 0) iDeadline = 0;
 
 
+	//上次系统生成的字母
+	char cLastAlpha = 0;
+
 
 	//上次的字母是否已经敲入
 	bool bHasTyped = false;
 
 	//绘制游戏界面
 
-
+	
 	DrawGameInfo(iLevel);
-	//画底部
-	goto_xy(0, CONSOLE_HEIGHT);
-	for (size_t i = 0; i < CONSOLE_WIDTH; i++)
-	{
-		printf("=");
-	}
+
 
 	//开始生成
 	while (1) {
@@ -235,21 +207,18 @@ int StartGame(int iLevel)
 		now = clock();
 
 		//检测是否敲入字母
-		if (_kbhit() && pFirstWord->cWord)
+		if (_kbhit()&& cLastAlpha)
 		{
 			//cTypedAplha 上次敲入的字母
 			char cTypedAplha = _getch();
 
 			//若当前的字母没有敲入
-			//if (!bHasTyped)
-			//若当前屏幕有字母
-			if (pFirstWord->cWord>0)
+			if (!bHasTyped)
 			{
 
 				//正确输入
-				if (cTypedAplha == pFirstWord->cWord || cTypedAplha == pFirstWord->cWord + ('a' - 'A')) {
+				if (cTypedAplha == cLastAlpha || cTypedAplha == cLastAlpha + ('a' - 'A')) {
 					iScore += iRightScore;
-					DeleteWord(pFirstWord);
 					//此处可增加反馈:OnInputCorrectly()
 					//1.正确输入的字母变绿
 					//2.正确输入的音效!
@@ -271,90 +240,46 @@ int StartGame(int iLevel)
 			}
 		}
 
-		//整体下落
-		int iDropTime = 500;
-		int iGameInfoLength = 5;
-		int iGameBufferHeight = CONSOLE_HEIGHT - iGameInfoLength - 1;
 
-		if ((now - start) / (CLOCKS_PER_SEC / 1000) - iTimeInDrop >= iDropTime) {
+		//生成新的字母
+		if ((now - start) / (CLOCKS_PER_SEC/1000) - i>=iNewAlphaTime) {
 
 			//更新计时器
-			iTimeInDrop = (now - start) / (CLOCKS_PER_SEC / 1000);
+			i = (now - start) / (CLOCKS_PER_SEC / 1000);
 
 
-			//使用新的掉落方式
-			for (Word* pTmp = pFirstWord; pTmp->pNext; pTmp = pTmp->pNext)
+
+			//若上个字母没有输入,则扣分
+			//扣分规则:错误扣分 * 未输入的惩罚倍率
+			if (!bHasTyped && cLastAlpha)
 			{
-				if (pTmp->iPosY > (iGameInfoLength + iGameBufferHeight - 1))
-				{
-					//若上个字母没有输入,则扣分
-					//扣分规则:错误扣分 * 未输入的惩罚倍率
-					if (!bHasTyped && pFirstWord->cWord)
-					{
-						iScore -= (int)(iErrorScore * dNotTypePunishRate);
-						//此处增加未输入的反馈
-						//1.未输入的字母变灰
-						//2.未输入的音效?(生成新字母的音效 和这个重合?)
-
-					}
-
-					DeleteWord(pTmp);
-					pTmp = pTmp->pNext;
-					////删去此字母
-					//goto_xy(pFirstWord->iPos, pFirstWord->iPosY);
-					//printf(" ");
-					//pFirstWord = pTmp->pNext;
-					//pTmp = pTmp->pNext;
-					
-				}
-
-				//将字母下移一行
-				goto_xy((int)pTmp->iPos, (int)pTmp->iPosY);
-				printf(" ");
-				pTmp->iPosY++;
-				goto_xy(pTmp->iPos, pTmp->iPosY);
-				printf("%c", pTmp->cWord);
+				iScore -=(int) (iErrorScore * dNotTypePunishRate);
+				//此处增加未输入的反馈
+				//1.未输入的字母变灰
+				//2.未输入的音效?(生成新字母的音效 和这个重合?)
 
 			}
 
 
-			//bHasTyped = 0;
-			DrawGameInfo(iLevel);
-		}
-
-
-		//生成新的字母
-		if ((now - start) / (CLOCKS_PER_SEC / 1000) - iTimeInNewWord >= iNewAlphaTime) {
-
-			//更新计时器
-			iTimeInNewWord = (now - start) / (CLOCKS_PER_SEC / 1000);
-
-
-
-
-
 			//产生新字母
 			char cRandChar = rand() % 26 + 'A';
-			pCurWord->cWord = cRandChar;
+			cLastAlpha = cRandChar;
 
-			//iPos = 随机字母的位置
+			//iPos 随机字母的位置
 			int iPos = rand() % CONSOLE_WIDTH;
-			goto_xy(iPos, iGameInfoLength + 1);
-			printf("%c", cRandChar);
 
-			pCurWord->iPos = iPos;
-			pCurWord->iPosY = iGameInfoLength+1;
-			pCurWord->cWord = cRandChar;
-			pCurWord->pNext = (Word*)malloc(sizeof(Word));
-			pCurWord = pCurWord->pNext;
-			pCurWord->pNext = 0;
+			//使用goto代替空格
+			GetConsoleScreenBufferInfo(hOut, &bInfo);
+			goto_xy(iPos, bInfo.dwCursorPosition.Y);
+			/*for (size_t i = 0; i < iPos; i++)
+			{
+				printf(" ");
+			}*/
 
-
+			printf("%c\n\n\n\n\n", cRandChar);
 			bHasTyped = 0;
 			DrawGameInfo(iLevel);
 		}
-
-
 		//游戏结束判断
 		if (iScore < iDeadline) {
 			return iScore;
@@ -383,18 +308,17 @@ int StartGame(int iLevel)
 void DrawGameInfo(int level) {
 
 	//获取当前光标位置(备份)
-
+	
 	GetConsoleScreenBufferInfo(hOut, &bInfo);
 
 	//光标移动至最上行
-	goto_xy(0, 0);
-	//goto_xy(0, bInfo.dwCursorPosition.Y > CONSOLE_HEIGHT ? bInfo.dwCursorPosition.Y - CONSOLE_HEIGHT + 2 : 0);
+	goto_xy(0, bInfo.dwCursorPosition.Y > CONSOLE_HEIGHT ? bInfo.dwCursorPosition.Y - CONSOLE_HEIGHT + 1 : 0);
 
 	//开始绘制
 	//制表符: ╦ ╩ ╝ ╔ ╗ ╚ ═ ║ 
 	//不要用putchar 会不显示
 	printf("╔");
-	for (size_t i = 1; i < CONSOLE_WIDTH - 1; i++)
+	for (size_t i = 1; i < CONSOLE_WIDTH-1; i++)
 	{
 		printf("═");
 	}
@@ -409,7 +333,7 @@ void DrawGameInfo(int level) {
 	//此处可能会影响后面的字母
 	//输出卡关,分数,速度,胜利/失败分数,时间
 	printf("LEVEL:%3d SCORE:%5d SPEED:%4dms Mission:%4d Deadline:%4d %100c",
-		level, iScore, iNewAlphaTime, iMission, iDeadline, ' ');
+		level, iScore, iNewAlphaTime, iMission,iDeadline , ' ');
 
 	goto_xy(0, bInfo.dwCursorPosition.Y > CONSOLE_HEIGHT ? bInfo.dwCursorPosition.Y - CONSOLE_HEIGHT + 4 : 3);
 	printf("%120c", ' ');
@@ -418,14 +342,14 @@ void DrawGameInfo(int level) {
 
 
 	printf("╚");
-	for (size_t i = 1; i < CONSOLE_WIDTH - 1; i++)
+	for (size_t i = 1; i < CONSOLE_WIDTH-1; i++)
 	{
 		printf("═");
 	}
 	printf("╝");
-
+	
 	//恢复光标信息
-	goto_xy(bInfo.dwCursorPosition.X, bInfo.dwCursorPosition.Y - 1);
+	goto_xy(bInfo.dwCursorPosition.X, bInfo.dwCursorPosition.Y);
 
 }
 
@@ -438,15 +362,15 @@ void goto_xy(int x, int y)
 }
 
 //绘制卡关胜利的界面
-void DrawWinShell(int iScore, int iNextLevel)
+void DrawWinShell(int iScore,int iNextLevel)
 {
 	system("cls");
 	printf("Congratulation!\n");
-	printf("Your Score:%d\n\n\n", iScore);
+	printf("Your Score:%d\n\n\n",iScore);
 	printf("Are you ready for next level %d?\nPRESS Y TO GO", iNextLevel);
 
 	//监测玩家抉择
-
+	
 	while (1)
 	{
 		char cInput = _getch();
@@ -484,7 +408,7 @@ bool DrawLoseShell(int iScore)
 		{
 			return true;
 		}
-		else if (cInput == 'n' || cInput == 'N')
+		else if(cInput == 'n' || cInput == 'N')
 		{
 			return false;
 		}
