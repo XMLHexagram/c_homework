@@ -4,10 +4,25 @@
 #include<conio.h>
 #include<time.h>
 #include<Windows.h>
-
+#include<mmsystem.h>
+#pragma comment(lib, "WINMM.LIB")
 #define _CRT_SECURE_NO_WARNINGS 1
+//色彩库
+#define Red SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_RED|FOREGROUND_INTENSITY);
+#define Blue SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_BLUE|FOREGROUND_INTENSITY);
+#define Green SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_GREEN|FOREGROUND_INTENSITY);
+#define White SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), FOREGROUND_INTENSITY | FOREGROUND_RED | FOREGROUND_GREEN | FOREGROUND_BLUE);
+#define Yellow SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_RED|FOREGROUND_GREEN|FOREGROUND_INTENSITY);
+#define Pink SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_INTENSITY|FOREGROUND_RED|FOREGROUND_BLUE);
+#define Cyan SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_INTENSITY|FOREGROUND_GREEN|FOREGROUND_BLUE);
+//使用后如要恢复原色请使用以下宏定义
+#define YuanSe SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_INTENSITY);
+
 //绘制游戏信息,卡关(实现),分数(全局);
 void DrawGameInfo(int level);
+
+//正确输入的反应
+void OnInputCorrectly(char cLastAlpha);
 
 //设置光标位置
 void goto_xy(int x, int y);
@@ -18,6 +33,7 @@ int StartGame(int iLevel);
 //游戏胜负界面
 void DrawWinShell(int iScore, int iNextLevel);
 bool DrawLoseShell(int iScore);
+
 
 
 HANDLE hOut;
@@ -97,12 +113,15 @@ int main()
 		printf("\n");
 	}
 	goto_xy(0, 0);
+
+
+	White		//白色输出
 	printf("Welcome To Type Game!\n\n\n");
+	Red			//红色输出
 	printf("Please Set The Game Shell Width By Scrolling The Console!!!\n\n\n");
-
-
+	Green		//绿色输出
 	printf("Type Any Key To Start Game\n\n\n");
-
+	White		//白色输出
 
 
 	getchar();
@@ -153,6 +172,15 @@ int main()
 	printf("Thanks for playing!");
 }
 
+
+void OnInputCorrectly(char cLastAlpha)
+{
+	PlaySound(TEXT("Ding.wav"), 0, SND_FILENAME);
+	Green
+	printf("%c", cLastAlpha);
+	YuanSe
+}
+
 int StartGame(int iLevel)
 {
 	system("cls");
@@ -181,18 +209,22 @@ int StartGame(int iLevel)
 	iMission = iRightScore * iWinTimes + iScoreOnNewLevel;
 	iDeadline = iScoreOnNewLevel - iErrorScore * iLoseTimes;
 
+
 	//若失败分数小于0,则设为0(防止出现负分数)
 	if (iDeadline < 0) iDeadline = 0;
+
 
 
 	//上次系统生成的字母
 	char cLastAlpha = 0;
 
 
+
 	//上次的字母是否已经敲入
 	bool bHasTyped = false;
 
-	//绘制游戏界面
+
+	//绘制游戏界面	
 	DrawGameInfo(iLevel);
 	//开始生成
 	while (1) {
@@ -234,6 +266,7 @@ int StartGame(int iLevel)
 
 			}
 		}
+
 
 
 		//生成新的字母
@@ -296,6 +329,7 @@ int StartGame(int iLevel)
 //		 ║										║
 //		 ╚══════════════════════════════════════╝
 //
+
 void DrawGameInfo(int level) {
 
 	//获取当前光标位置(备份)
@@ -345,12 +379,15 @@ void DrawGameInfo(int level) {
 }
 
 
+
 //将光标移动到(x,y)
 void goto_xy(int x, int y)
 {
 	COORD pos = { x,y };
 	SetConsoleCursorPosition(hOut, pos);
 }
+
+
 
 //绘制卡关胜利的界面
 void DrawWinShell(int iScore,int iNextLevel)
@@ -372,6 +409,7 @@ void DrawWinShell(int iScore,int iNextLevel)
 
 	}
 }
+
 
 
 
