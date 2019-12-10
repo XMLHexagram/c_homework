@@ -17,7 +17,7 @@ enum STATE
 	endALL,
 } state;
 
-void initGame();
+void initConsole();
 
 void DrawGameInfo(int level);
 
@@ -78,7 +78,8 @@ int main()
 		switch (state)
 		{
 		case init:
-			initGame();
+			initConsole();
+			iScore = 100;
 			state = run;
 			break;
 		case run:
@@ -106,10 +107,23 @@ int main()
 		case end:
 			//一局结束
 			system("cls");
-
 			printf("Game Over");
+			printf("input \"E\" to end the game,\"R\"to back to try again\n");
+			char tempinput;
+			tempinput = getchar();
+			if (tempinput == 'R' || tempinput == 'r')
+			{
+				system("cls");
+				state = init;
+				break;
+			}
+			else
+			{
+				state = endALL;
+			}
 			state = endALL;
 			break;
+
 		case endALL:
 			//结束语
 			printf("\nThanks for playing!");
@@ -367,7 +381,7 @@ bool DrawLoseShell(int iScore)
 	}
 }
 
-void initGame()
+void initConsole()
 {
 	//初始化
 	hOut = GetStdHandle(STD_OUTPUT_HANDLE);
