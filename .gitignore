@@ -55,5 +55,8 @@ dkms.conf
 /.vs
 /src/.vs/ProjectS/v16/Browse.VC.db
 /src/.vs/ProjectS/v16/Browse.VC.opendb
-.vscode/tasks.json
-.vscode/launch.json
+/src/.vs/ProjectS/v16/.suo
+/src/.vs/ProjectS/v16/.suo
+/src/.vs/ProjectS/v16/ipch/AutoPCH
+/src/Debug/ProjectS.tlog
+/src/x64/Debug
