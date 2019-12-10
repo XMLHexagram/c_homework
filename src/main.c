@@ -1,13 +1,24 @@
 ﻿#include <stdio.h>
-#include<stdlib.h>
+#include <stdlib.h>
 #include <math.h>
-#include<conio.h>
-#include<time.h>
-#include<Windows.h>
-#include<stdbool.h>
+#include <conio.h>
+#include <time.h>
+#include <Windows.h>
+#include <stdbool.h>
 
 #define _CRT_SECURE_NO_WARNINGS 1
 //绘制游戏信息,卡关(实现),分数(全局);
+
+enum STATE
+{
+	init = 1,
+	run,
+	end,
+	endALL,
+} state;
+
+void initGame();
+
 void DrawGameInfo(int level);
 
 //设置光标位置
@@ -20,7 +31,6 @@ int StartGame(int iLevel);
 void DrawWinShell(int iScore, int iNextLevel);
 bool DrawLoseShell(int iScore);
 
-
 HANDLE hOut;
 CONSOLE_SCREEN_BUFFER_INFO bInfo;
 CONSOLE_CURSOR_INFO cInfo;
@@ -30,8 +40,8 @@ int CONSOLE_WIDTH;
 int CONSOLE_HEIGHT;
 
 //正确,错误的分数
-int iRightScore=100;
-int iErrorScore=90;
+int iRightScore = 100;
+int iErrorScore = 90;
 
 //胜利/失败 次数
 int iWinTimes = 1112;
@@ -40,7 +50,7 @@ int iLoseTimes = 1112;
 //int iSuccessScore = iRightScore* iWinTimes;
 //int iLoseScore = iLoseTime * iErrorScore;
 
-double dNotTypePunishRate=0.5;
+double dNotTypePunishRate = 0.5;
 
 //
 int iScore = 100;
@@ -50,8 +60,6 @@ int iScoreOnNewLevel = 0;
 //每个卡关实时胜利/失败分数
 int iMission = 0;
 int iDeadline = 0;
-
-
 
 //初始卡关时间(毫秒)
 int iInitialTime = 2000;
@@ -64,95 +72,54 @@ clock_t now;
 
 int main()
 {
-	//初始化
-	hOut = GetStdHandle(STD_OUTPUT_HANDLE);
-	GetConsoleScreenBufferInfo(hOut, &bInfo);
-
-	system("cls");
-	//设置控制台标题
-	SetConsoleTitle(TEXT("TYPE GAME"));
-
-	//隐藏光标
-	CONSOLE_CURSOR_INFO cInfo;
-	cInfo.bVisible = 0;
-	cInfo.dwSize = 1;
-	
-	SetConsoleCursorInfo(hOut, &cInfo);
-	
-
-	//获取控制台宽度
-	CONSOLE_WIDTH = bInfo.dwSize.X;
-
-	//控制台高度,暂时无法获取
-	CONSOLE_HEIGHT = 30;
-
-
-	//GetCurrentTime
-
-	time(&curtime);
-	//Init Rand
-	srand(curtime);
-
-	//游戏欢迎界面
-	for (size_t i = 0; i < 100; i++)
+	state = init;
+	while (1)
 	{
-		printf("\n");
-	}
-	goto_xy(0, 0);
-	printf("Welcome To Type Game!\n\n\n");
-	printf("Please Set The Game Shell Width By Scrolling The Console!!!\n\n\n");
-
-
-	printf("Type Any Key To Start Game\n\n\n");
-
-
-
-	getchar();
-
-	//锁死控制台边框大小，防止因为拉伸控制台边框大小而导致的错误
-	//（同时此处建议可以扩大控制台的大小
-	HWND hWnd = GetConsoleWindow(); //获得cmd窗口句柄
-	RECT rc;
-	GetWindowRect(hWnd, &rc); //获得cmd窗口对应矩形
-
-	//改变cmd窗口风格
-	SetWindowLongPtr(hWnd,
-		GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) & ~WS_THICKFRAME & ~WS_MAXIMIZEBOX & ~WS_MINIMIZEBOX);
-	SetWindowPos(hWnd,
-		NULL,
-		rc.left,
-		rc.top,
-		rc.right - rc.left, rc.bottom - rc.top,
-		NULL);
-	//）
-
-
-	//游戏开始
-	for (int iLevel = 1, iLastLevelScore = 0; iScore>=0; )
-	{
-		//开始游戏
-		iLastLevelScore= StartGame(iLevel);
-		
-		//胜利
-		if (iLastLevelScore >= iMission)
+		switch (state)
 		{
-			DrawWinShell(iScore, ++iLevel);
-		}
-		else 
-		{
-			//分数低于0 或选择放弃游戏
-			if (!DrawLoseShell(iScore))
+		case init:
+			initGame();
+			state = run;
+			break;
+		case run:
+			//游戏开始
+			for (int iLevel = 1, iLastLevelScore = 0; iScore >= 0;)
 			{
-				system("cls");
+				//开始游戏
+				iLastLevelScore = StartGame(iLevel);
 
-				printf("Game Over");
-				break;
-			}
+				//胜利
+				if (iLastLevelScore >= iMission)
+				{
+					DrawWinShell(iScore, ++iLevel);
+				}
+				else
+				{
+					//分数低于0 或选择放弃游戏j
+					if (!DrawLoseShell(iScore))
+					{
+						state = end;
+					}
+				}
+			};
+			break;
+		case end:
+			//一局结束
+			system("cls");
+
+			printf("Game Over");
+			state = endALL;
+			break;
+		case endALL:
+			//结束语
+			printf("\nThanks for playing!");
+			getchar();
+			getchar();
+			exit(0);
+		default:
+			break;
 		}
-	};
-
-	//结束语
-	printf("Thanks for playing!");
+	}
 }
 
 int StartGame(int iLevel)
@@ -166,16 +133,13 @@ int StartGame(int iLevel)
 	GetConsoleScreenBufferInfo(hOut, &bInfo);
 	CONSOLE_WIDTH = bInfo.dwSize.X;
 
-
 	printf("%60s", "GAME START\n");
 
 	//开始计时
 	start = clock();
 	int i = 0;
 
-	
 	goto_xy(0, 5);
-
 
 	//计算 胜利/失败分数
 	//iScoreOnNewLevel这个变量似乎没用,可用iScore代替?
@@ -184,12 +148,11 @@ int StartGame(int iLevel)
 	iDeadline = iScoreOnNewLevel - iErrorScore * iLoseTimes;
 
 	//若失败分数小于0,则设为0(防止出现负分数)
-	if (iDeadline < 0) iDeadline = 0;
-
+	if (iDeadline < 0)
+		iDeadline = 0;
 
 	//上次系统生成的字母
 	char cLastAlpha = 0;
-
 
 	//上次的字母是否已经敲入
 	bool bHasTyped = false;
@@ -197,14 +160,15 @@ int StartGame(int iLevel)
 	//绘制游戏界面
 	DrawGameInfo(iLevel);
 	//开始生成
-	while (1) {
+	while (1)
+	{
 		DrawGameInfo(iLevel);
 
 		//获取运行时间
 		now = clock();
 
 		//检测是否敲入字母
-		if (_kbhit()&& cLastAlpha)
+		if (_kbhit() && cLastAlpha)
 		{
 			//cTypedAplha 上次敲入的字母
 			char cTypedAplha = _getch();
@@ -214,12 +178,12 @@ int StartGame(int iLevel)
 			{
 
 				//正确输入
-				if (cTypedAplha == cLastAlpha || cTypedAplha == cLastAlpha + ('a' - 'A')) {
+				if (cTypedAplha == cLastAlpha || cTypedAplha == cLastAlpha + ('a' - 'A'))
+				{
 					iScore += iRightScore;
 					//此处可增加反馈:OnInputCorrectly()
 					//1.正确输入的字母变绿
 					//2.正确输入的音效!
-
 				}
 				else
 				{
@@ -233,30 +197,25 @@ int StartGame(int iLevel)
 				bHasTyped = 1;
 				//更新游戏信息
 				DrawGameInfo(iLevel);
-
 			}
 		}
 
-
 		//生成新的字母
-		if ((now - start) / (CLOCKS_PER_SEC/1000) - i>=iNewAlphaTime) {
+		if ((now - start) / (CLOCKS_PER_SEC / 1000) - i >= iNewAlphaTime)
+		{
 
 			//更新计时器
 			i = (now - start) / (CLOCKS_PER_SEC / 1000);
-
-
 
 			//若上个字母没有输入,则扣分
 			//扣分规则:错误扣分 * 未输入的惩罚倍率
 			if (!bHasTyped && cLastAlpha)
 			{
-				iScore -=(int) (iErrorScore * dNotTypePunishRate);
+				iScore -= (int)(iErrorScore * dNotTypePunishRate);
 				//此处增加未输入的反馈
 				//1.未输入的字母变灰
 				//2.未输入的音效?(生成新字母的音效 和这个重合?)
-
 			}
-
 
 			//产生新字母
 			char cRandChar = rand() % 26 + 'A';
@@ -274,14 +233,14 @@ int StartGame(int iLevel)
 			DrawGameInfo(iLevel);
 		}
 		//游戏结束判断
-		if (iScore < iDeadline) {
+		if (iScore < iDeadline)
+		{
 			return iScore;
 		}
 		else if (iScore >= iMission)
 		{
 			return iScore;
 		}
-
 	}
 
 	return 0;
@@ -298,21 +257,22 @@ int StartGame(int iLevel)
 //		 ║										║
 //		 ╚══════════════════════════════════════╝
 //
-void DrawGameInfo(int level) {
+void DrawGameInfo(int level)
+{
 
 	//获取当前光标位置(备份)
-	
+
 	GetConsoleScreenBufferInfo(hOut, &bInfo);
 
 	//光标移动至最上行
 	goto_xy(0, bInfo.dwCursorPosition.Y > CONSOLE_HEIGHT ? bInfo.dwCursorPosition.Y - CONSOLE_HEIGHT + 1 : 0);
 
 	//开始绘制
-	//制表符: ╦ ╩ ╝ ╔ ╗ ╚ ═ ║ 
+	//制表符: ╦ ╩ ╝ ╔ ╗ ╚ ═ ║
 	//不要用putchar 会不显示
 	// printf("╔");
 	printf("+");
-	for (size_t i = 1; i < CONSOLE_WIDTH-1; i++)
+	for (size_t i = 1; i < CONSOLE_WIDTH - 1; i++)
 	{
 		// printf("═");
 		printf("=");
@@ -329,47 +289,44 @@ void DrawGameInfo(int level) {
 	//此处可能会影响后面的字母
 	//输出卡关,分数,速度,胜利/失败分数,时间
 	printf("LEVEL:%3d SCORE:%5d SPEED:%4dms Mission:%4d Deadline:%4d %100c",
-		level, iScore, iNewAlphaTime, iMission,iDeadline , ' ');
+		   level, iScore, iNewAlphaTime, iMission, iDeadline, ' ');
 
 	goto_xy(0, bInfo.dwCursorPosition.Y > CONSOLE_HEIGHT ? bInfo.dwCursorPosition.Y - CONSOLE_HEIGHT + 4 : 3);
 	printf("%120c", ' ');
 
 	goto_xy(0, bInfo.dwCursorPosition.Y > CONSOLE_HEIGHT ? bInfo.dwCursorPosition.Y - CONSOLE_HEIGHT + 5 : 4);
 
-
 	// printf("╚");
 	printf("+");
-	for (size_t i = 1; i < CONSOLE_WIDTH-1; i++)
+	for (size_t i = 1; i < CONSOLE_WIDTH - 1; i++)
 	{
 		// printf("═");
 		printf("=");
 	}
 	// printf("╝");
 	printf("+");
-	
+
 	//恢复光标信息
 	goto_xy(bInfo.dwCursorPosition.X, bInfo.dwCursorPosition.Y);
-
 }
-
 
 //将光标移动到(x,y)
 void goto_xy(int x, int y)
 {
-	COORD pos = { x,y };
+	COORD pos = {x, y};
 	SetConsoleCursorPosition(hOut, pos);
 }
 
 //绘制卡关胜利的界面
-void DrawWinShell(int iScore,int iNextLevel)
+void DrawWinShell(int iScore, int iNextLevel)
 {
 	system("cls");
 	printf("Congratulation!\n");
-	printf("Your Score:%d\n\n\n",iScore);
+	printf("Your Score:%d\n\n\n", iScore);
 	printf("Are you ready for next level %d?\nPRESS Y TO GO", iNextLevel);
 
 	//监测玩家抉择
-	
+
 	while (1)
 	{
 		char cInput = _getch();
@@ -377,12 +334,8 @@ void DrawWinShell(int iScore,int iNextLevel)
 		{
 			break;
 		}
-
 	}
 }
-
-
-
 
 //绘制卡关失败的界面
 //选择是否重新尝试卡关
@@ -390,8 +343,8 @@ void DrawWinShell(int iScore,int iNextLevel)
 bool DrawLoseShell(int iScore)
 {
 	//若分数小于0 直接失败
-	if (iScore < 0) return false;
-
+	if (iScore < 0)
+		return false;
 
 	system("cls");
 
@@ -407,9 +360,69 @@ bool DrawLoseShell(int iScore)
 		{
 			return true;
 		}
-		else if(cInput == 'n' || cInput == 'N')
+		else if (cInput == 'n' || cInput == 'N')
 		{
 			return false;
 		}
 	}
+}
+
+void initGame()
+{
+	//初始化
+	hOut = GetStdHandle(STD_OUTPUT_HANDLE);
+	GetConsoleScreenBufferInfo(hOut, &bInfo);
+
+	system("cls");
+	//设置控制台标题
+	SetConsoleTitle(TEXT("TYPE GAME"));
+
+	//隐藏光标
+	CONSOLE_CURSOR_INFO cInfo;
+	cInfo.bVisible = 0;
+	cInfo.dwSize = 1;
+
+	SetConsoleCursorInfo(hOut, &cInfo);
+
+	//获取控制台宽度
+	CONSOLE_WIDTH = bInfo.dwSize.X;
+
+	//控制台高度,暂时无法获取
+	CONSOLE_HEIGHT = 30;
+
+	//GetCurrentTime
+
+	time(&curtime);
+	//Init Rand
+	srand(curtime);
+
+	//游戏欢迎界面
+	for (size_t i = 0; i < 100; i++)
+	{
+		printf("\n");
+	}
+	goto_xy(0, 0);
+	printf("Welcome To Type Game!\n\n\n");
+	printf("Please Set The Game Shell Width By Scrolling The Console!!!\n\n\n");
+
+	printf("Type Any Key To Start Game\n\n\n");
+
+	getchar();
+
+	//锁死控制台边框大小，防止因为拉伸控制台边框大小而导致的错误
+	//（同时此处建议可以扩大控制台的大小
+	HWND hWnd = GetConsoleWindow(); //获得cmd窗口句柄
+	RECT rc;
+	GetWindowRect(hWnd, &rc); //获得cmd窗口对应矩形
+
+	//改变cmd窗口风格
+	SetWindowLongPtr(hWnd,
+					 GWL_STYLE, GetWindowLong(hWnd, GWL_STYLE) & ~WS_THICKFRAME & ~WS_MAXIMIZEBOX & ~WS_MINIMIZEBOX);
+	SetWindowPos(hWnd,
+				 NULL,
+				 rc.left,
+				 rc.top,
+				 rc.right - rc.left, rc.bottom - rc.top,
+				 NULL);
+	//）
 }
