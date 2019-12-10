@@ -108,7 +108,7 @@ int main()
 			//一局结束
 			system("cls");
 			printf("Game Over");
-			printf("input \"E\" to end the game,\"R\"to back to try again\n");
+			printf("\"R\"to back to try again,input any other char to end this game\n");
 			char tempinput;
 			tempinput = getchar();
 			if (tempinput == 'R' || tempinput == 'r')
