@@ -531,7 +531,7 @@ void DrawGameInfo(int level) {
 	Cyan
 	//输出卡关,分数,速度,胜利/失败分数,时间
 	goto_xy(3, 2);
-	printf("LEVEL:%3d SPEED:%4dms SCORE:%6d Mission:%6d Deadline:%5d highest mark:%6d",
+	printf("LEVEL:%3d SPEED:%4dms SCORE:%6d Mission:%6d Deadline:%5d HighestMark:%6d",
 		level, iNewAlphaTime, iScore,iMission, iDeadline, iHighestMark);
 
 
