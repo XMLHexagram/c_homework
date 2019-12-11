@@ -5,6 +5,13 @@
 #include<time.h>
 #include<Windows.h>
 #include<mmsystem.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include<iostream>
+#include <fcntl.h>
+#include <process.h> 
+#include <bits/stdc++.h>
+#include <sys/stat.h>
 #pragma comment(lib, "WINMM.LIB")
 #define _CRT_SECURE_NO_WARNINGS 1
 //色彩库
@@ -16,7 +23,7 @@
 #define Pink SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_INTENSITY|FOREGROUND_RED|FOREGROUND_BLUE);
 #define Cyan SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_INTENSITY|FOREGROUND_GREEN|FOREGROUND_BLUE);
 //使用后如要恢复原色请使用以下宏定义
-#define YuanSe SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE),FOREGROUND_INTENSITY);
+#define YuanSe SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE));
 
 //字母结构体
 typedef struct Word
@@ -33,8 +40,6 @@ Word* pCurWord = pFirstWord;
 //绘制游戏信息,卡关(实现),分数(全局);
 void DrawGameInfo(int level);
 
-//正确输入的反应
-void OnInputCorrectly(char cLastAlpha);
 
 //设置光标位置
 void goto_xy(int x, int y);
@@ -54,8 +59,6 @@ void DeleteWord(Word *pTmp)
 	pFirstWord = pTmp->pNext;
 }
 
-
-
 HANDLE hOut;
 CONSOLE_SCREEN_BUFFER_INFO bInfo;
 CONSOLE_CURSOR_INFO cInfo;
@@ -69,7 +72,7 @@ int iRightScore = 100;
 int iErrorScore = 90;
 
 //胜利/失败 次数
-int iWinTimes = 1112;
+int iWinTimes = 10;
 int iLoseTimes = 1112;
 
 //int iSuccessScore = iRightScore* iWinTimes;
@@ -96,7 +99,7 @@ time_t curtime;
 clock_t start;
 clock_t now;
 
-int main()
+int main(int argc, char* argv[])
 {
 	//初始化
 	hOut = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -145,6 +148,7 @@ int main()
 
 
 	getchar();
+	
 
 	//锁死控制台边框大小，防止因为拉伸控制台边框大小而导致的错误
 	//（同时此处建议可以扩大控制台的大小
@@ -161,7 +165,8 @@ int main()
 		rc.top,
 		rc.right - rc.left, rc.bottom - rc.top,
 		NULL);
-
+		
+	
 
 
 	//游戏开始
@@ -196,8 +201,7 @@ int main()
 int StartGame(int iLevel)
 {
 	system("cls");
-
-	//设置产生字母的间隔时间
+	//设置产生字母的间隔时间s
 	iNewAlphaTime = (int)iInitialTime * (pow(0.8, iLevel));
 
 	//读取控制台宽度
@@ -272,6 +276,7 @@ int StartGame(int iLevel)
 				if (cTypedAplha == pFirstWord->cWord || cTypedAplha == pFirstWord->cWord + ('a' - 'A')) {
 					iScore += iRightScore;
 					DeleteWord(pFirstWord);
+					PlaySound(TEXT("Ding.wav"), NULL, SND_ASYNC | SND_NODEFAULT);
 					//PlaySound(TEXT("Ding.wav"), 0, SND_FILENAME);
 					//此处可增加反馈:OnInputCorrectly()
 					//1.正确输入的字母变绿
