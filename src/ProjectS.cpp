@@ -51,6 +51,10 @@ int StartGame(int iLevel);
 void DrawWinShell(int iScore, int iNextLevel);
 bool DrawLoseShell(int iScore);
 
+//音乐播放函数
+void play_music();
+
+
 void DeleteWord(Word *pTmp)
 {
 	//删去字母
@@ -104,7 +108,7 @@ int main(int argc, char* argv[])
 	//初始化
 	hOut = GetStdHandle(STD_OUTPUT_HANDLE);
 	GetConsoleScreenBufferInfo(hOut, &bInfo);
-
+	srand((unsigned int)time(0));
 	system("cls");
 	//设置控制台标题
 	SetConsoleTitle(TEXT("TYPE GAME"));
@@ -205,10 +209,8 @@ int StartGame(int iLevel)
 	iNewAlphaTime = (int)iInitialTime * (pow(0.8, iLevel));
 
 	//背景音乐产生(运用mci播放背景音乐)
-
-	mciSendString(L"open ../res/bgm.mp3 alias start", NULL, 0, NULL);
-	mciSendString(L"play start repeat", NULL, 0, NULL);
-	//mciSendString(L"close start", NULL, 0, NULL); 关闭语句
+	play_music();
+	
 
 	//读取控制台宽度
 	GetConsoleScreenBufferInfo(hOut, &bInfo);
@@ -529,4 +531,41 @@ bool DrawLoseShell(int iScore)
 			return false;
 		}
 	}
+}
+
+void play_music()
+{
+	//背景音乐部分
+	char str[50];
+	int r = 1;
+	r = rand() % 5+1;
+	switch (r)
+	{
+	case 1:
+		mciSendString(L"open ../res/bgm1.mp3 alias start", NULL, 0, NULL);
+		mciSendString(L"play start repeat", NULL, 0, NULL);
+		break;
+	case 2:
+		mciSendString(L"open ../res/bgm2.mp3 alias start", NULL, 0, NULL);
+		mciSendString(L"play start repeat", NULL, 0, NULL);
+		break;
+	case 3:
+		mciSendString(L"open ../res/bgm3.mp3 alias start", NULL, 0, NULL);
+		mciSendString(L"play start repeat", NULL, 0, NULL);
+		break;
+	case 4:
+		mciSendString(L"open ../res/bgm4.mp3 alias start", NULL, 0, NULL);
+		mciSendString(L"play start repeat", NULL, 0, NULL);
+		break;
+	case 5:
+		mciSendString(L"open ../res/bgm5.mp3 alias start", NULL, 0, NULL);
+		mciSendString(L"play start repeat", NULL, 0, NULL);
+		break;
+	case 6:
+		mciSendString(L"open ../res/bgm6.mp3 alias start", NULL, 0, NULL);
+		mciSendString(L"play start repeat", NULL, 0, NULL);
+		break;
+	}
+	
+	//mciSendString(L"close start", NULL, 0, NULL); 关闭语句
 }
