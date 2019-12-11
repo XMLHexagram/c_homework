@@ -79,7 +79,7 @@ int CONSOLE_HEIGHT;
 
 //正确,错误的分数
 int iRightScore = 10;
-int iErrorScore = 5;
+int iErrorScore = 10;
 
 //胜利/失败 次数
 int iWinTimes = 10;
@@ -91,7 +91,7 @@ int iLoseTimes = 10;
 double dNotTypePunishRate = 0.5;
 
 //初始分数
-int iScore = 10000;
+int iScore = 1000;
 int iScoreOnNewLevel = 0;
 
 //每个卡关实时胜利/失败分数
@@ -100,11 +100,15 @@ int iDeadline = 0;
 
 char iWordPos[40];
 
+//之前记录的最高分
+int iHighestMark;
 //初始卡关时间(毫秒)
 int iInitialTime = 1000;
 int iNewAlphaTime;
 int iFallTime = 150;
 
+
+int flag = 0; //用于判断是否分数已经达到最高分
 
 //时间相关
 time_t curtime;
@@ -178,9 +182,15 @@ int main()
 	Green
 	printf("Type Any Key To Start Game\n\n\n");
 
+	//读取最高分文件
+	char* str1 = (char*)calloc(7, 1);
+	FILE* file;
+	fopen_s(&file, "resource/HighestMark.txt", "rt+");
+	fgets(str1, 7, file);
+	iHighestMark = atoi(str1);
+	fclose(file);
 
 
-	
 	_getch();
 	
 	SetConsoleCursorInfo(hOut, &cInfo);
@@ -199,6 +209,11 @@ int main()
 		iLastLevelScore = StartGame(iLevel);
 		if(iLevel%4==0)
 			mciSendString(L"close start", NULL, 0, NULL);
+		if (iScore > atoi(str1))
+		{
+			sprintf(str1,"%d",iScore);
+		}
+			
 		//胜利
 		if (iLastLevelScore >= iMission)
 		{
@@ -216,25 +231,43 @@ int main()
 			}
 		}
 	};
-
 	//结束语
+	
+	if (flag == 1)
+	{
+		fopen_s(&file, "resource/HighestMark.txt", "w+");
+		fclose(file);
+
+		sprintf(str1, "%d", iHighestMark);
+		fopen_s(&file, "resource/HighestMark.txt", "wt+");
+		fwrite(str1, 1, 7, file);
+		fclose(file);
+	}
 	Blue
 	printf("Thanks for playing!");
 }
 
 int StartGame(int iLevel)
 {
+	
 	system("cls");
+	iNewAlphaTime = iInitialTime;
+	if (iLevel != 1)
+	{
+		//设置产生字母的间隔时间
+		iNewAlphaTime = (int)iInitialTime * (pow(0.9, iLevel));
+		//设置胜利和失败的次数
+		iWinTimes = (int)iWinTimes * (pow(1.05, iLevel));
+		iLoseTimes = (int)iLoseTimes * (pow(1.2, iLevel));
+		iRightScore = (int)iRightScore * (pow(1.1, iLevel));
+		iErrorScore = (int)iErrorScore * (pow(0.95, iLevel));
+	}
+		
 
-	//设置产生字母的间隔时间
-	iNewAlphaTime = (int)iInitialTime * (pow(0.85, iLevel));
-	iWinTimes = (int)iWinTimes * (pow(1.1, iLevel));
-	iLoseTimes = (int)iLoseTimes * (pow(1.2, iLevel));
 	if (iNewAlphaTime < iFallTime)
 	{
 		iFallTime = iNewAlphaTime * 0.5;
 	}
-
 
 
 	//背景音乐产生(运用mci播放背景音乐)
@@ -327,6 +360,12 @@ int StartGame(int iLevel)
 					iScore += iRightScore;
 					DeleteWord(pFirstWord);
 					PlaySound(TEXT("../res/Right.wav"), NULL, SND_ASYNC | SND_NODEFAULT);
+					if (iScore > iHighestMark)
+					{
+						iHighestMark = iScore;
+						flag = 1;
+					}
+						
 					//此处可增加反馈:OnInputCorrectly()
 					//1.正确输入的字母变绿
 					//2.正确输入的音效!
@@ -343,6 +382,7 @@ int StartGame(int iLevel)
 
 				bHasTyped = 1;
 				//更新游戏信息
+
 				DrawGameInfo(iLevel);
 
 			}
@@ -490,9 +530,9 @@ void DrawGameInfo(int level) {
 	goto_xy(0, bInfo.dwCursorPosition.Y > CONSOLE_HEIGHT ? bInfo.dwCursorPosition.Y - CONSOLE_HEIGHT + 3 : 2);
 	Cyan
 	//输出卡关,分数,速度,胜利/失败分数,时间
-	goto_xy(10, 2);
-	printf("LEVEL:%3d SPEED:%4dms SCORE:%5d Mission:%4d Deadline:%4d",
-		level, iNewAlphaTime, iScore,iMission, iDeadline);
+	goto_xy(3, 2);
+	printf("LEVEL:%3d SPEED:%4dms SCORE:%6d Mission:%6d Deadline:%5d highest mark:%6d",
+		level, iNewAlphaTime, iScore,iMission, iDeadline, iHighestMark);
 
 
 
@@ -510,7 +550,6 @@ void DrawGameInfo(int level) {
 	goto_xy(bInfo.dwCursorPosition.X, bInfo.dwCursorPosition.Y - 1);
 
 }
-
 
 //将光标移动到(x,y)
 void goto_xy(int x, int y)
@@ -555,8 +594,6 @@ void DrawWinShell(int iScore, int iNextLevel)
 
 	}
 }
-
-
 
 
 //绘制卡关失败的界面
