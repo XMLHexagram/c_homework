@@ -67,8 +67,6 @@ char* GetGoText();
 char* GetGameOverText();
 char* GetLevelText();
 
-
-
 HANDLE hOut;
 CONSOLE_SCREEN_BUFFER_INFO bInfo;
 CONSOLE_CURSOR_INFO cInfo;
@@ -260,7 +258,7 @@ int StartGame(int iLevel)
 		iWinTimes = (int)iWinTimes * (pow(1.05, iLevel));
 		iLoseTimes = (int)iLoseTimes * (pow(1.2, iLevel));
 		iRightScore = (int)iRightScore * (pow(1.1, iLevel));
-		iErrorScore = (int)iErrorScore * (pow(0.95, iLevel));
+		iErrorScore = (int)((double)iErrorScore * (pow(0.95, iLevel)));
 	}
 		
 
