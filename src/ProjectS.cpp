@@ -204,6 +204,12 @@ int StartGame(int iLevel)
 	//设置产生字母的间隔时间s
 	iNewAlphaTime = (int)iInitialTime * (pow(0.8, iLevel));
 
+	//背景音乐产生(运用mci播放背景音乐)
+
+	mciSendString(L"open ../res/bgm.mp3 alias start", NULL, 0, NULL);
+	mciSendString(L"play start repeat", NULL, 0, NULL);
+	//mciSendString(L"close start", NULL, 0, NULL); 关闭语句
+
 	//读取控制台宽度
 	GetConsoleScreenBufferInfo(hOut, &bInfo);
 	CONSOLE_WIDTH = bInfo.dwSize.X;
@@ -276,12 +282,11 @@ int StartGame(int iLevel)
 				if (cTypedAplha == pFirstWord->cWord || cTypedAplha == pFirstWord->cWord + ('a' - 'A')) {
 					iScore += iRightScore;
 					DeleteWord(pFirstWord);
-					PlaySound(TEXT("Ding.wav"), NULL, SND_ASYNC | SND_NODEFAULT);
-					//PlaySound(TEXT("Ding.wav"), 0, SND_FILENAME);
+					PlaySound(TEXT("../res/Ding.wav"), NULL, SND_ASYNC | SND_NODEFAULT);
+					
 					//此处可增加反馈:OnInputCorrectly()
 					//1.正确输入的字母变绿
 					//2.正确输入的音效!
-
 				}
 				else
 				{
