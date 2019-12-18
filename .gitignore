@@ -59,3 +59,5 @@ dkms.conf
 /src/.vs/ProjectS/v16/ipch/AutoPCH
 /src/Debug/ProjectS.tlog
 /src/x64/Debug
+.vscode/launch.json
+.vscode/tasks.json
