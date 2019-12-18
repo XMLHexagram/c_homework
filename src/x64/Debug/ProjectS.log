@@ -1,0 +1,15 @@
+﻿  ProjectS.c
+C:\Users\29679\Desktop\c_homework\c_homework\src\ProjectS.c(144,7): warning C4047: “函数”:“UINT”与“void *”的间接级别不同
+C:\Users\29679\Desktop\c_homework\c_homework\src\ProjectS.c(144,7): warning C4024: “SetWindowPos”: 形参和实参 7 的类型不同
+C:\Users\29679\Desktop\c_homework\c_homework\src\ProjectS.c(167,15): warning C4244: “函数”: 从“time_t”转换到“unsigned int”，可能丢失数据
+C:\Users\29679\Desktop\c_homework\c_homework\src\ProjectS.c(259,57): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+C:\Users\29679\Desktop\c_homework\c_homework\src\ProjectS.c(261,51): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+C:\Users\29679\Desktop\c_homework\c_homework\src\ProjectS.c(262,52): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+C:\Users\29679\Desktop\c_homework\c_homework\src\ProjectS.c(263,54): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+C:\Users\29679\Desktop\c_homework\c_homework\src\ProjectS.c(270,34): warning C4244: “=”: 从“double”转换到“int”，可能丢失数据
+C:\Users\29679\Desktop\c_homework\c_homework\src\ProjectS.c(332,15): warning C4267: “函数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Users\29679\Desktop\c_homework\c_homework\src\ProjectS.c(334,29): warning C4267: “函数”: 从“size_t”转换到“int”，可能丢失数据
+C:\Users\29679\Desktop\c_homework\c_homework\src\ProjectS.c(577,77): warning C4474: printf: 格式字符串中传递的参数太多
+C:\Users\29679\Desktop\c_homework\c_homework\src\ProjectS.c(577,77): message : 占位符和其参数预计 0 可变参数，但提供的却是 1 参数
+C:\Users\29679\Desktop\c_homework\c_homework\src\ProjectS.c(631,7): warning C4101: “str”: 未引用的局部变量
+  ProjectS.vcxproj -> C:\Users\29679\Desktop\c_homework\c_homework\src\x64\Debug\ProjectS.exe
