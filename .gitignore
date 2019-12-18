@@ -62,3 +62,8 @@ dkms.conf
 /src/x64/Debug
 .vscode/launch.json
 .vscode/tasks.json
+.idea/.gitignore
+.idea/c_homework.iml
+.idea/misc.xml
+.idea/modules.xml
+.idea/vcs.xml
