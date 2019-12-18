@@ -8,6 +8,7 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdbool.h>
 #pragma comment(lib, "WINMM.LIB")
 
 #define _CRT_SECURE_NO_WARNINGS 1
@@ -28,10 +29,11 @@ typedef struct Word
 	char iPos;
 	char cWord;
 	char iPosY;
-	Word* pNext;
-}Word1;
+	struct Word* pNext;
+}Word;
 Word* pFirstWord; //= (Word*)malloc(sizeof(Word));
-Word* pCurWord = pFirstWord;
+//Word* pCurWord = pFirstWord;
+Word* pCurWord;
 
 
 //绘制游戏信息,卡关(实现),分数(全局);
@@ -243,6 +245,7 @@ int main()
 	}
 	Blue
 	printf("Thanks for playing!");
+	return 0;
 }
 
 int StartGame(int iLevel)
@@ -363,8 +366,6 @@ int StartGame(int iLevel)
 						iHighestMark = iScore;
 						flag = 1;
 					}
-						
-					//此处可增加反馈:OnInputCorrectly()
 					//1.正确输入的字母变绿
 					//2.正确输入的音效!
 				}
@@ -373,7 +374,6 @@ int StartGame(int iLevel)
 					//错误输入
 					iScore -= iErrorScore;
 					PlaySound(TEXT("../res/Wrong.wav"), NULL, SND_ASYNC | SND_NODEFAULT);
-					//此处可增加反馈:OnInputIncorrectly()
 					//1.错误输入的字母变红
 					//2.错误输入的音效!
 				}
